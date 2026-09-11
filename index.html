@@ -1,6 +1,1019 @@
-<!-- ربط ملف الـ Manifest وتهيئته للهواتف -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2563eb">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2382/2382461.png">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>المالية</title>
+
+  <!-- إعدادات تطبيق PWA للهواتف -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2382/2382461.png">
+
+  <style>
+    :root {
+      --bg-body: #0d1117;
+      --card-bg: #161b22;
+      --card-border: #30363d;
+      --text-main: #f0f6fc;
+      --text-sub: #8b949e;
+      --input-bg: #0d1117;
+      --input-border: #30363d;
+      
+      --insta-color: #8b5cf6;
+      --insta-glow: 0 0 25px rgba(139, 92, 246, 0.35);
+      
+      --cash-color: #f59e0b;
+      --cash-glow: 0 0 25px rgba(245, 158, 11, 0.35);
+
+      --total-color: #10b981;
+      --total-glow: 0 0 25px rgba(16, 185, 129, 0.35);
+    }
+
+    [data-theme="light"] {
+      --bg-body: #f4f6f9;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --text-main: #1e293b;
+      --text-sub: #64748b;
+      --input-bg: #f8fafc;
+      --input-border: #cbd5e1;
+
+      --insta-glow: 0 8px 20px rgba(139, 92, 246, 0.18);
+      --cash-glow: 0 8px 20px rgba(245, 158, 11, 0.18);
+      --total-glow: 0 8px 20px rgba(16, 185, 129, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      padding: 16px;
+      direction: rtl;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding: 10px 0;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .briefcase-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      flex-shrink: 0;
+    }
+
+    .user-info h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1.3;
+      color: var(--text-main);
+    }
+
+    .user-info .phone-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.88rem;
+      color: var(--text-sub);
+      font-weight: 600;
+      margin-top: 2px;
+      direction: ltr;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-top {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .btn-icon-only {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border-radius: 12px;
+    }
+
+    .btn-pdf {
+      color: #3b82f6;
+      border-color: rgba(59, 130, 246, 0.35);
+    }
+    .btn-pdf:hover { background: rgba(59, 130, 246, 0.12); }
+
+    .btn-reset-single {
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+    .btn-reset-single:hover { background: rgba(239, 68, 68, 0.12); }
+
+    .dashboard-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 20px;
+      border-radius: 18px;
+      position: relative;
+    }
+
+    .card.insta {
+      box-shadow: var(--insta-glow);
+      border-top: 3px solid var(--insta-color);
+    }
+
+    .card.cash {
+      box-shadow: var(--cash-glow);
+      border-top: 3px solid var(--cash-color);
+    }
+
+    .card.total {
+      box-shadow: var(--total-glow);
+      border-top: 3px solid var(--total-color);
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-sub);
+    }
+
+    .icon-box {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .insta .icon-box { background: rgba(139, 92, 246, 0.15); fill: var(--insta-color); }
+    .cash .icon-box { background: rgba(245, 158, 11, 0.15); fill: var(--cash-color); }
+    .total .icon-box { background: rgba(16, 185, 129, 0.15); fill: var(--total-color); }
+
+    .balance-num {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      word-break: break-word;
+    }
+
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 20px 24px;
+      margin-bottom: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .form-header-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .form-header-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle-arrow {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease;
+      fill: var(--text-main);
+    }
+
+    .toggle-arrow.open {
+      transform: rotate(180deg);
+    }
+
+    .form-content-collapsible {
+      margin-top: 20px;
+      display: block;
+    }
+
+    .form-content-collapsible.collapsed {
+      display: none;
+    }
+
+    .selector-label {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+      display: block;
+      font-weight: 600;
+    }
+
+    .button-group-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .choice-btn {
+      background: var(--input-bg);
+      border: 1.5px solid var(--input-border);
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-sub);
+    }
+
+    .choice-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+    .choice-btn.active-in {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: #10b981;
+      color: #10b981;
+    }
+
+    .choice-btn.active-out {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    .choice-btn.active-insta {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: var(--insta-color);
+      color: var(--insta-color);
+    }
+
+    .choice-btn.active-cash {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: var(--cash-color);
+      color: var(--cash-color);
+    }
+
+    .inputs-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .inputs-row { grid-template-columns: 1fr; }
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1.5px solid var(--input-border);
+      background-color: var(--input-bg);
+      color: var(--text-main);
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .input-field:focus { border-color: #3b82f6; }
+
+    .btn-submit-main {
+      width: 100%;
+      padding: 15px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-cancel-edit {
+      display: none;
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 10px;
+      background: transparent;
+      border: 1px solid var(--input-border);
+      color: var(--text-sub);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .table-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+      min-width: 620px;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--card-border);
+      font-size: 0.92rem;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--text-sub);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .amount-cell {
+      font-weight: 800;
+      font-size: 1.05rem;
+      white-space: nowrap;
+      min-width: 120px;
+    }
+
+    .date-time-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+
+    .date-time-box .date-line {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .date-time-box .time-line {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-in { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .badge-out { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .badge svg { width: 14px; height: 14px; fill: currentColor; }
+
+    .tag-account {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-start;
+      white-space: nowrap;
+    }
+
+    .action-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s;
+    }
+
+    .action-btn:hover { transform: scale(1.1); }
+    .action-btn.edit { background: rgba(59, 130, 246, 0.15); fill: #3b82f6; }
+    .action-btn.delete { background: rgba(239, 68, 68, 0.15); fill: #ef4444; }
+    .action-btn svg { width: 17px; height: 17px; }
+
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 26px;
+      width: 90%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .modal-icon-circle {
+      width: 60px;
+      height: 60px;
+      background: rgba(239, 68, 68, 0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      fill: #ef4444;
+    }
+
+    .modal-content h3 { font-size: 1.25rem; margin-bottom: 8px; }
+    .modal-content p { color: var(--text-sub); font-size: 0.9rem; margin-bottom: 22px; }
+
+    .modal-buttons { display: flex; gap: 10px; }
+
+    .modal-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-danger-confirm { background: #ef4444; color: white; }
+    .btn-cancel-modal { background: var(--input-border); color: var(--text-main); }
+
+    @media print {
+      body { background: #ffffff !important; color: #000000 !important; padding: 0 !important; }
+      .header-actions, .form-card, .actions-cell, th:last-child, td:last-child, .modal-backdrop { display: none !important; }
+      .card, .table-card { border: 1px solid #ccc !important; box-shadow: none !important; background: #fff !important; color: #000 !important; }
+      .card-title, .user-info .phone-tag, .date-time-box .time-line { color: #555 !important; }
+      .badge-in, .badge-out { border: 1px solid #ccc !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="user-profile">
+        <div class="briefcase-icon">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="#ffffff">
+            <path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/>
+          </svg>
+        </div>
+        <div class="user-info">
+          <h1>الأستاذ مصطفى عيد الصافي</h1>
+          <div class="phone-tag">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+              <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+            </svg>
+            <span>01210739937</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn-top btn-pdf" onclick="exportToPDF()">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
+            <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+          </svg>
+          <span>تصدير كـ PDF</span>
+        </button>
+
+        <button class="btn-top btn-reset-single" onclick="openResetAllModal()">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
+            <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+          </svg>
+          <span>تصفير الحسابات</span>
+        </button>
+
+        <button class="btn-top btn-icon-only" onclick="toggleTheme()" title="تبديل الوضع">
+          <span id="themeIcon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+              <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </header>
+
+    <div class="dashboard-cards">
+      <div class="card insta">
+        <div class="card-head">
+          <span class="card-title">إنستاباي</span>
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24" width="22" height="22">
+              <path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="balance-num" id="instaBalance">0</div>
+      </div>
+
+      <div class="card cash">
+        <div class="card-head">
+          <span class="card-title">كاش</span>
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24" width="22" height="22">
+              <path d="M5 6h14c1.1 0 2 .9 2 2v8c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V8c0-1.1.9-2 2-2zm7 3a3 3 0 100 6 3 3 0 000-6zm0 1.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="balance-num" id="cashBalance">0</div>
+      </div>
+
+      <div class="card total">
+        <div class="card-head">
+          <span class="card-title">المتاح الكلي</span>
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24" width="22" height="22">
+              <path d="M12 2a1 1 0 011 1v1.07A7.002 7.002 0 0119 11v1h1a1 1 0 110 2h-1v1c0 3.86-3.14 7-7 7s-7-3.14-7-7v-1H4a1 1 0 110-2h1v-1a7.002 7.002 0 016-6.93V3a1 1 0 011-1zm0 4a5 5 0 00-5 5v3h10v-3a5 5 0 00-5-5z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="balance-num" id="totalBalance">0</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-header-toggle" onclick="toggleFormCollapse()">
+        <div class="form-header-title">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="#3b82f6">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          <span id="formTitle">تسجيل معاملة جديدة</span>
+        </div>
+        <div class="toggle-arrow open" id="formToggleArrow">
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="form-content-collapsible" id="formBody">
+        <form id="transForm">
+          <input type="hidden" id="editIndex" value="-1">
+
+          <span class="selector-label">نوع العملية</span>
+          <div class="button-group-row">
+            <button type="button" class="choice-btn active-in" id="btnTypeIn" onclick="selectType('in')">
+              <svg viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
+              وارد (إضافة)
+            </button>
+            <button type="button" class="choice-btn" id="btnTypeOut" onclick="selectType('out')">
+              <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
+              مصروف (خصم)
+            </button>
+          </div>
+
+          <span class="selector-label">المحفظة / الحساب</span>
+          <div class="button-group-row">
+            <button type="button" class="choice-btn active-insta" id="btnAccInsta" onclick="selectAccount('insta')">
+              <svg viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"/></svg>
+              إنستاباي
+            </button>
+            <button type="button" class="choice-btn" id="btnAccCash" onclick="selectAccount('cash')">
+              <svg viewBox="0 0 24 24"><path d="M5 6h14c1.1 0 2 .9 2 2v8c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V8c0-1.1.9-2 2-2zm7 3a3 3 0 100 6 3 3 0 000-6z"/></svg>
+              كاش
+            </button>
+          </div>
+
+          <div class="inputs-row">
+            <div>
+              <span class="selector-label">المبلغ</span>
+              <input type="number" id="transAmount" class="input-field" step="any" min="1" required>
+            </div>
+            <div>
+              <span class="selector-label">ملاحظات / البيان</span>
+              <input type="text" id="transNote" class="input-field">
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit-main" id="submitBtn">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span id="submitBtnText">إضافة المعاملة الآن</span>
+          </button>
+
+          <button type="button" class="btn-cancel-edit" id="cancelEditBtn" onclick="cancelEdit()">إلغاء التعديل</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-title">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="#3b82f6">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10V7H7v3zm0 4h10v-3H7v3zm0 4h7v-3H7v3z"/>
+        </svg>
+        سجل العمليات
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>النوع</th>
+            <th>الجهة</th>
+            <th>المبلغ</th>
+            <th>البيان</th>
+            <th>التاريخ والوقت</th>
+            <th>الخيارات</th>
+          </tr>
+        </thead>
+        <tbody id="transTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="customModal">
+    <div class="modal-content">
+      <div class="modal-icon-circle">
+        <svg viewBox="0 0 24 24" width="30" height="30">
+          <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+        </svg>
+      </div>
+      <h3 id="modalTitle">تأكيد الإجراء</h3>
+      <p id="modalDesc">هل تريد بالتأكيد المتابعة؟ لا يمكن التراجع بعد ذلك.</p>
+      <div class="modal-buttons">
+        <button class="modal-btn btn-danger-confirm" id="modalConfirmBtn">نعم، تأكيد</button>
+        <button class="modal-btn btn-cancel-modal" onclick="closeModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(type) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const t = audioCtx.currentTime;
+
+      if (type === 'click') {
+        osc.frequency.setValueAtTime(450, t);
+        gain.gain.setValueAtTime(0.03, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+        osc.start(t); osc.stop(t + 0.05);
+      } else if (type === 'add') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, t);
+        osc.frequency.exponentialRampToValueAtTime(700, t + 0.1);
+        gain.gain.setValueAtTime(0.05, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        osc.start(t); osc.stop(t + 0.12);
+      } else if (type === 'warn') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(260, t);
+        osc.frequency.exponentialRampToValueAtTime(140, t + 0.15);
+        gain.gain.setValueAtTime(0.05, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+        osc.start(t); osc.stop(t + 0.15);
+      }
+    }
+
+    let currentType = 'in';
+    let currentAccount = 'insta';
+    let transactions = JSON.parse(localStorage.getItem('my_pocket_app')) || [];
+
+    function toggleFormCollapse() {
+      playBeep('click');
+      const formBody = document.getElementById('formBody');
+      const arrow = document.getElementById('formToggleArrow');
+      if (formBody.classList.contains('collapsed')) {
+        formBody.classList.remove('collapsed');
+        arrow.classList.add('open');
+      } else {
+        formBody.classList.add('collapsed');
+        arrow.classList.remove('open');
+      }
+    }
+
+    function selectType(type) {
+      playBeep('click');
+      currentType = type;
+      document.getElementById('btnTypeIn').className = (type === 'in') ? 'choice-btn active-in' : 'choice-btn';
+      document.getElementById('btnTypeOut').className = (type === 'out') ? 'choice-btn active-out' : 'choice-btn';
+    }
+
+    function selectAccount(acc) {
+      playBeep('click');
+      currentAccount = acc;
+      document.getElementById('btnAccInsta').className = (acc === 'insta') ? 'choice-btn active-insta' : 'choice-btn';
+      document.getElementById('btnAccCash').className = (acc === 'cash') ? 'choice-btn active-cash' : 'choice-btn';
+    }
+
+    function formatInt(num) {
+      return Math.round(Number(num) || 0).toLocaleString('en-US');
+    }
+
+    function updateDashboard() {
+      let instaSum = 0;
+      let cashSum = 0;
+      const tBody = document.getElementById('transTableBody');
+      tBody.innerHTML = '';
+
+      transactions.forEach((item) => {
+        const val = parseFloat(item.amount) || 0;
+        if (item.account === 'insta') {
+          instaSum += (item.type === 'in' ? val : -val);
+        } else {
+          cashSum += (item.type === 'in' ? val : -val);
+        }
+      });
+
+      transactions.slice().reverse().forEach((item, revIdx) => {
+        const originalIndex = transactions.length - 1 - revIdx;
+        const val = parseFloat(item.amount) || 0;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <span class="badge ${item.type === 'in' ? 'badge-in' : 'badge-out'}">
+              <svg viewBox="0 0 24 24"><path d="${item.type === 'in' ? 'M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z' : 'M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z'}"/></svg>
+              ${item.type === 'in' ? 'وارد' : 'مصروف'}
+            </span>
+          </td>
+          <td>
+            <span class="tag-account" style="color: ${item.account === 'insta' ? '#8b5cf6' : '#f59e0b'}">
+              ${item.account === 'insta' ? 'إنستاباي' : 'كاش'}
+            </span>
+          </td>
+          <td class="amount-cell">${formatInt(val)}</td>
+          <td>${item.note || '-'}</td>
+          <td>
+            <div class="date-time-box">
+              <span class="date-line">${item.dateOnly || item.date || '-'}</span>
+              <span class="time-line">${item.timeOnly || ''}</span>
+            </div>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <button class="action-btn edit" title="تعديل" onclick="startEdit(${originalIndex})">
+                <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+              </button>
+              <button class="action-btn delete" title="حذف" onclick="openDeleteModal(${originalIndex})">
+                <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+              </button>
+            </div>
+          </td>
+        `;
+        tBody.appendChild(tr);
+      });
+
+      document.getElementById('instaBalance').innerText = formatInt(instaSum);
+      document.getElementById('cashBalance').innerText = formatInt(cashSum);
+      document.getElementById('totalBalance').innerText = formatInt(instaSum + cashSum);
+
+      localStorage.setItem('my_pocket_app', JSON.stringify(transactions));
+    }
+
+    document.getElementById('transForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById('transAmount').value);
+      const note = document.getElementById('transNote').value.trim();
+      const editIdx = parseInt(document.getElementById('editIndex').value);
+
+      if (editIdx > -1) {
+        transactions[editIdx] = {
+          ...transactions[editIdx],
+          type: currentType,
+          account: currentAccount,
+          amount,
+          note
+        };
+        cancelEdit();
+      } else {
+        const now = new Date();
+        const dateOnly = now.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+        const timeOnly = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+
+        transactions.push({
+          type: currentType,
+          account: currentAccount,
+          amount,
+          note,
+          dateOnly,
+          timeOnly
+        });
+      }
+
+      playBeep('add');
+      updateDashboard();
+      document.getElementById('transAmount').value = '';
+      document.getElementById('transNote').value = '';
+    });
+
+    function startEdit(idx) {
+      playBeep('click');
+      const item = transactions[idx];
+      
+      const formBody = document.getElementById('formBody');
+      const arrow = document.getElementById('formToggleArrow');
+      formBody.classList.remove('collapsed');
+      arrow.classList.add('open');
+
+      selectType(item.type);
+      selectAccount(item.account);
+
+      document.getElementById('transAmount').value = item.amount;
+      document.getElementById('transNote').value = item.note;
+      document.getElementById('editIndex').value = idx;
+
+      document.getElementById('formTitle').innerText = "تعديل المعاملة";
+      document.getElementById('submitBtnText').innerText = "تحديث وتثبيت التعديل";
+      document.getElementById('cancelEditBtn').style.display = "block";
+
+      window.scrollTo({ top: document.querySelector('.form-card').offsetTop - 30, behavior: 'smooth' });
+    }
+
+    function cancelEdit() {
+      document.getElementById('editIndex').value = "-1";
+      document.getElementById('formTitle').innerText = "تسجيل معاملة جديدة";
+      document.getElementById('submitBtnText').innerText = "إضافة المعاملة الآن";
+      document.getElementById('cancelEditBtn').style.display = "none";
+      document.getElementById('transAmount').value = '';
+      document.getElementById('transNote').value = '';
+    }
+
+    let modalActionCallback = null;
+
+    function showModal(title, desc, onConfirm) {
+      playBeep('warn');
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalDesc').innerText = desc;
+      modalActionCallback = onConfirm;
+      document.getElementById('customModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      playBeep('click');
+      document.getElementById('customModal').style.display = 'none';
+      modalActionCallback = null;
+    }
+
+    document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+      if (modalActionCallback) modalActionCallback();
+      closeModal();
+    });
+
+    function openDeleteModal(index) {
+      showModal(
+        'حذف المعاملة',
+        'هل أنت متأكد من حذف هذه المعاملة؟ سيتم تحديث الرصيد تلقائياً.',
+        () => {
+          transactions.splice(index, 1);
+          updateDashboard();
+        }
+      );
+    }
+
+    function openResetAllModal() {
+      showModal(
+        'تصفير شامل لكل الحسابات',
+        'تنبيه! هذا الإجراء سيقوم بحذف كافة العمليات وتصفير أرصدة إنستاباي وكاش نهائياً والبدء من جديد.',
+        () => {
+          transactions = [];
+          cancelEdit();
+          updateDashboard();
+        }
+      );
+    }
+
+    function exportToPDF() {
+      playBeep('click');
+      window.print();
+    }
+
+    const sunIconSvg = `<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>`;
+    const moonIconSvg = `<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12.3 2a10 10 0 0 0-.19 20 10.04 10.04 0 0 0 9.95-8.51 1 1 0 0 0-1.19-1.14 8 8 0 1 1-8.57-10.35 1 1 0 0 0-.19-1.99c.07 0-.08 0 .19-.01z"/></svg>`;
+
+    function toggleTheme() {
+      playBeep('click');
+      const isLight = document.body.getAttribute('data-theme') === 'light';
+      if (isLight) {
+        document.body.removeAttribute('data-theme');
+        document.getElementById('themeIcon').innerHTML = sunIconSvg;
+        localStorage.setItem('wallet_theme', 'dark');
+      } else {
+        document.body.setAttribute('data-theme', 'light');
+        document.getElementById('themeIcon').innerHTML = moonIconSvg;
+        localStorage.setItem('wallet_theme', 'light');
+      }
+    }
+
+    if (localStorage.getItem('wallet_theme') === 'light') {
+      document.body.setAttribute('data-theme', 'light');
+      document.getElementById('themeIcon').innerHTML = moonIconSvg;
+    }
+
+    // تسجيل تطبيق PWA تلقائياً
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('PWA جاهز'))
+          .catch((err) => console.log('خطأ في التسجيل:', err));
+      });
+    }
+
+    updateDashboard();
+  </script>
+</body>
+</html>
